@@ -34,6 +34,34 @@ type Parser struct {
 	scope *Scope
 }
 
+func ParseExpr(r *parse.Input, o Options) (IExpr, error, int) {
+	p := &Parser{
+		l:     NewLexer(r),
+		o:     o,
+		tt:    WhitespaceToken, // trick so that next() works
+		await: true,
+	}
+
+	if p.tt == WhitespaceToken || p.tt == LineTerminatorToken {
+		p.next()
+	}
+
+	p.enterScope(&Scope{}, true)
+
+	expr := p.parseExpression(OpExpr)
+
+	if p.err == nil {
+		p.err = p.l.Err()
+	} else {
+		offset := p.l.r.Offset() - len(p.data)
+		p.err = parse.NewError(buffer.NewReader(p.l.r.Bytes()), offset, p.err.Error())
+	}
+	if p.err == io.EOF {
+		p.err = nil
+	}
+	return expr, p.err, p.l.r.Offset()
+}
+
 // Parse returns a JS AST tree of.
 func Parse(r *parse.Input, o Options) (*AST, error) {
 	ast := &AST{}
