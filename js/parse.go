@@ -34,7 +34,10 @@ type Parser struct {
 	scope *Scope
 }
 
-func ParseExpr(r *parse.Input, o Options) (IExpr, error, int) {
+// ParseExpr will parse a single expression from the input and return an IExpr.
+// It will ignore the rest of the string, returning the number of characters read.
+// This is somewhat similar to acorn's parseExpressionAt function.
+func ParseExpr(r *parse.Input, o Options) (IExpr, int, error) {
 	p := &Parser{
 		l:     NewLexer(r),
 		o:     o,
@@ -59,7 +62,7 @@ func ParseExpr(r *parse.Input, o Options) (IExpr, error, int) {
 	if p.err == io.EOF {
 		p.err = nil
 	}
-	return expr, p.err, p.l.r.Offset()
+	return expr, p.l.r.Offset(), p.err
 }
 
 // Parse returns a JS AST tree of.
