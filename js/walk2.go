@@ -1,8 +1,8 @@
 package js
 
 type IVisitor2 interface {
-	Enter(n INode)
-	Exit(n INode)
+	Enter(node, parent INode)
+	Exit(node, parent INode)
 }
 
 func Walk2(v IVisitor2, n INode) {
@@ -14,8 +14,8 @@ func visit(v IVisitor2, n INode, parent INode) {
 		return
 	}
 
-	v.Enter(n)
-	defer v.Exit(n)
+	v.Enter(n, parent)
+	defer v.Exit(n, parent)
 
 	switch n := n.(type) {
 	case *AST:
